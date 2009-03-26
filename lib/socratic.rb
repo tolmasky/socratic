@@ -1,7 +1,13 @@
+
+# Add the directory containing this file to the start of the load path if it
+# isn't there already.
+$:.push(File.dirname(__FILE__)) unless
+  $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
+
 require 'rubygems'
 require 'xml'
-require 'socratic/parser'
 
+require 'socratic/parser'
 
 class Socratic
 
