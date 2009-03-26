@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'socratic'
+require 'socratic/parser'
+
+file_name = ARGV[0]
+
+puts Socratic::Parser.syntax_for_file(file_name).name
+puts Socratic::Parser.parse_file(file_name).to_s(:indent => true)
+
+IO.popen('mate', 'w') do |mate|
+    mate.write Socratic::Parser.parse_file(file_name)
+end
+
+
+=begin
+@implementation K : D
+{
+
+}
+- (unknown)returner
+{
+
+}
+
+@end
+(?: [A-Za-z_][A-Za-z0-9_]*+ | :: )++
+=end

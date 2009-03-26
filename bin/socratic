@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'rubygems'
+require 'sinatra'
+require 'socratic'
+
+configure do
+    Socratic.load_files Dir.glob(File.join(File.dirname(__FILE__), '..', '**', '*.j'))
+end
+
+get('/') { redirect "/#{HOMEPAGE}" }
+
+get '/Classes/:class_name' do
+    'hello'
+    #erb(:class, :views_directory => File.join(File.dirname(__FILE__),'..', 'data', 'views', 'objectivej'))
+end
