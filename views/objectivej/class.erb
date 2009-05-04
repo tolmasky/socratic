@@ -1,6 +1,59 @@
 <%
 
-#require 'xml/xpath'
+class MethodDefinition
+    
+    attr_accessor :class_method
+    attr_accessor :return_type
+    attr_accessor :selector_parts
+    
+    def initialize(class_method, return_type, selector_parts)
+        @return_type = return_type
+        @selector_parts = selector_parts
+    end
+    
+    def class_method?
+        @class_method
+    end
+    
+    def shorthand_html
+        selector = class_method? ? '+ ' : '- '
+        selector_parts.each { |selector_part| selector += selector_part.name }
+        "<a href = '##{URI.escape(selector)}'>#{selector}</a>"
+    end
+    
+    def longhand_html
+        
+        selector = class_method? ? '+ ' : '- '
+        method = selector + '(' + return_type + ')'
+        parameter_list = nil
+        
+        selector_parts.each do |selector_part| 
+            selector += selector_part.name
+            method += selector_part.name
+            
+            if (selector_part.parameter_type)
+                method += '(' + selector_part.parameter_type + ')'
+                method += selector_part.parameter_name + ' '
+                
+                parameter_list = '<ul>' unless parameter_list
+                parameter_list += "<li>#{selector_part.parameter_name}</li>"
+            end
+        end
+        
+        "<a name = '#{URI.escape(selector)}'>#{method}</a>" + (parameter_list ? parameter_list + '</ul>' : '')
+    end
+end
+
+class SelectorPart
+    attr_accessor :name
+    attr_accessor :parameter_type
+    attr_accessor :parameter_name
+    
+    def initialize(name)
+        @name = name
+    end
+
+end
 
 class_name = params[:class_name]
 
@@ -8,9 +61,35 @@ puts Socratic.document
 
 methods = [];
 
-Socratic.document.find("/sources/source.js.objj/meta.implementation.js.objj[normalize-space(string(entity.name.type.js.objj))='#{class_name}']").each do |node|
-    node.find('.//meta.function.js.objj').each do |method_node|
-        methods << method_node.content
+Socratic.document.find("/sources/source.js.objj/meta.implementation.js.objj[normalize-space(string(entity.name.type.js.objj))='#{class_name}']").each do |class_node|
+    class_node.find('.//meta.function.js.objj').each do |method_node|
+    
+        
+        return_type = method_node.find_first('.//meta.return-type.js.objj/punctuation.definition.type.js.objj').next.content
+        
+        class_method = method_node.content.strip.index('+') != -1
+        
+        selector_parts = []
+        method_arguments = []
+        
+        method_node.first()
+        
+        method_node.find('.//entity.name.function.selector.js.objj').each do |selector_node|
+        
+            selector_part = SelectorPart.new(selector_node.content.strip)
+            
+            nextSibling = selector_node.next
+            
+            if (nextSibling && nextSibling.name == 'meta.argument-type.js.objj')
+                selector_part.name += ':'
+                selector_part.parameter_type = nextSibling.find_first('./punctuation.definition.type.js.objj').next.content.strip
+                selector_part.parameter_name = nextSibling.find_first('./variable.parameter.function.js.objj').content.strip
+            end
+            
+            selector_parts << selector_part
+        end
+
+        methods << MethodDefinition.new(class_method, return_type, selector_parts)
     end
 end
 
@@ -35,7 +114,13 @@ end
         <h2>Public Methods</h2>
         <ul
             <% methods.each do |method| %>
-                <li><%= method %></li>
+                <li><%= method.shorthand_html %></li>
+            <% end %>
+        </ul>
+        <h2>Public Methods</h2>
+        <ul
+            <% methods.each do |method| %>
+                <li><%= method.longhand_html %></li>
             <% end %>
         </ul>
     </body>
