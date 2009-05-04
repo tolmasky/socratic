@@ -2,18 +2,17 @@
 
 #require 'xml/xpath'
 
-#class_name = params[:class_name]
+class_name = params[:class_name]
 
-#REXML::XPath.match(Socratic.document.root, "/sources/source.js.objj/meta.implementation.js.objj[normalize-space(string(entity.name.type.js.objj))='#{class_name}']").each { puts 'found one' }
+puts Socratic.document
 
-#return @@class_definitions[class_name] = XPath.match(Sources.root, "/Sources/source.js.objj/meta.implementation.js.objj[normalize-space(string(entity.name.type.js.objj))='#{class_name}']").map { |element| self.new(element) } || []
+methods = [];
 
-#    class_definitions = Socratic::ObjectiveJ::ClassDefinition.all(params[:class_name])
-#    method_definitions = []
-
-#    class_definitions.each do |class_definition| 
-#        method_definitions += class_definition.method_definitions
-#    end
+Socratic.document.find("/sources/source.js.objj/meta.implementation.js.objj[normalize-space(string(entity.name.type.js.objj))='#{class_name}']").each do |node|
+    node.find('.//meta.function.js.objj').each do |method_node|
+        methods << method_node.content
+    end
+end
 
 %>
 
@@ -34,7 +33,10 @@
         <h1><%= params[:class_name] %></h1>
         <h2>Overview</h2>
         <h2>Public Methods</h2>
-        <ul>
+        <ul
+            <% methods.each do |method| %>
+                <li><%= method %></li>
+            <% end %>
         </ul>
     </body>
 </html>
