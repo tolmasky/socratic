@@ -12,7 +12,7 @@ class Processor
     
     def open_tag name, position
     
-         @node_stack.last << @line[@position...position] if position > @position
+        @node_stack.last << @line[@position...position] if position > @position
         
         node = XML::Node.new(name)
         

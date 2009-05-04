@@ -12,7 +12,11 @@ require 'socratic/parser'
 class Socratic
 
     VERSION = '1.0.0'
-  
+
+    def Socratic.document
+        @document
+    end
+
     def Socratic.load_files(file_names)
     
         @document = XML::Document.new

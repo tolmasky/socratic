@@ -11,5 +11,5 @@ end
 get('/') { redirect "/#{HOMEPAGE}" }
 
 get '/Classes/:class_name' do
-    erb(:class, :views_directory => File.join(File.dirname(__FILE__),'..', 'data', 'views', 'objectivej'))
+    erb(:class, :views_directory => File.join(File.dirname(__FILE__),'..', 'views', 'objectivej'))
 end
